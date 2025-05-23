@@ -12,15 +12,32 @@ def get_townhall_email(townhall_url)
 
   hash = Hash.new
 
-  townhall_email_xml = townhall_url.xpath('//a[@class ="send-mail"]')
-  townhall_email = townhall_email_xml.text
+  begin
+  townhall_email_html = townhall_url.xpath('//a[@class ="send-mail"]')
+  rescue => e
+    puts "Erreur xpath : #{e.message}"
+    townhall_email_html = nil
+  end
 
-  townhall_name_xml = townhall_url.xpath('//h1[@id ="titlePage"]')
-  townhall_name = townhall_name_xml.text
+  townhall_email = townhall_email_html.text
+  if townhall_email.empty?
+    townhall_email = nil
+  end
+
+  begin
+  townhall_name_html = townhall_url.xpath('//h1[@id ="titlePage"]')
+  rescue => e
+    puts "Erreur xpath : #{e.message}"
+    townhall_name_html = nil
+  end
+
+  townhall_name = townhall_name_html.text
+  if townhall_name.empty?
+    townhall_name = nil
+  end
 
   hash[townhall_name] = townhall_email
 
-  puts hash
   return hash
 end
 
@@ -33,21 +50,22 @@ def get_townhall_urls
   townhall_urls = []
 
   begin
-  townhall_urls_xml = page.xpath('//ul[@class="fr-raw-list"]//a[@class="fr-link"]')
+  townhall_urls_html = page.xpath('//ul[@class="fr-raw-list"]//a[@class="fr-link"]')
   rescue => e
     puts "Erreur xpath : #{e.message}"
   end
 
-  townhall_urls_xml.each do |url|
-    townhall_urls << url['href']
+  townhall_urls_html.each do |url|
+  townhall_urls << url['href']
 
   end
     return townhall_urls
 end
 
 # Méthode qui retourne le nom et le mail d'une ville dans un tableau contenant des hash
-def get_mail_array
+def get_email_array
   result_array = []
+  incomplete_data = 0
   townhall_urls = get_townhall_urls
 
   townhall_urls.each do |url|
@@ -55,6 +73,15 @@ def get_mail_array
     result_array << get_townhall_email(page_url)
   end
 
+  result_array.each do |email_hash|
+      key = email_hash.keys.first
+      value = email_hash.values.first
+      
+      if key.nil? || value.nil?
+        incomplete_data += 1
+      end
+    end
+    puts "Il y a #{incomplete_data} données incomplètes"
     puts result_array
     return result_array
   end
@@ -64,5 +91,5 @@ def get_mail_array
 # get_townhall_urls
 # get_townhall_email(test)
 # get_townhall_name(test)
-get_mail_array
+get_email_array
 

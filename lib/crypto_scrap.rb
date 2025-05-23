@@ -13,20 +13,20 @@ def get_crypto_names(page)
   crypto_names = []
 
   begin
-    crypto_names_xml = page.xpath('//tr//td[3]/div')
+    crypto_names_html = page.xpath('//tr//td[3]/div')
   rescue => e
     puts "Erreur XPath : #{e.message}"
     return []
   end
 
-  if crypto_names_xml.empty?
+  if crypto_names_html.empty?
     puts "Aucun élément trouvé"
     return []
   else
     count_invalid = 0
-    crypto_names_xml.each do |text_xml|
+    crypto_names_html.each do |text_html|
       
-      crypto_name = text_xml.text.strip
+      crypto_name = text_html.text.strip
 
       if crypto_name.empty?
         count_invalid += 1
@@ -50,24 +50,21 @@ def get_crypto_prices(page)
   crypto_prices = []
 
   begin 
-    crypto_prices_xml = page.xpath('//tr//td[5]//span')
+    crypto_prices_html = page.xpath('//tr//td[5]//span')
   rescue => e
     puts "Erreur Xpath : #{e.message}"
     return []
   end
   
-
-  if crypto_prices_xml.empty?
-
+  if crypto_prices_html.empty?
     puts "Aucun élément trouvé"
     return []
-
   else
     count_invalid = 0
 
-    crypto_prices_xml.each do |text_xml|
-      
-      crypto_price = text_xml.text.strip.gsub(/[$,]/, '')
+    crypto_prices_html.each do |text_html|
+
+      crypto_price = text_html.text.strip.gsub(/[$,]/, '')
 
       if crypto_price.empty?
         count_invalid += 1 
@@ -92,6 +89,17 @@ def get_cryptos(page)
   hash = crypto_names.zip(crypto_prices).to_h
   array_of_hashes = hash.map {|key, value| {key => value}}
 
+  if crypto_names.length != crypto_prices.length
+  puts "Attention : #{crypto_names.length} noms vs #{crypto_prices.length} prix"
+  end
+
+  for i in 0..2 do
+    if !crypto_names[i].nil? && !crypto_prices[i].nil?
+      puts "Donnée #{i+1}/3 validée"
+    else
+      puts "Donnée #{i+1}/3 manquante"
+    end
+  end
   
   if array_of_hashes.empty?
     puts "Les données n'ont pas été récupéré convenablement"
@@ -100,14 +108,15 @@ def get_cryptos(page)
 
     array_of_hashes.each do |crypto_hash|
       key = crypto_hash.keys.first
-      value = crypto_hash.keys.first
+      value = crypto_hash.values.first
 
       if key.nil? || value.nil?
         incomplete_data += 1
       end
-    
+   
     end
     puts "Il y a #{incomplete_data} données incomplètes"
+    puts array_of_hashes
     return array_of_hashes
   end
 end
