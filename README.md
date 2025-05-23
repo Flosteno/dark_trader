@@ -6,7 +6,7 @@ A project that consist of scrapping and parsing datas from two sites
 
 ### crypto_scrap.rb
 
-File holding methods to get the name and price of cryptocurrencies from [coinmarket]('https://coinmarketcap.com/all/views/all/')
+File holding methods to get the name and price of cryptocurrencies from [coinmarket](https://coinmarketcap.com/all/views/all/)
 
 ### email_scrap.rb
 
